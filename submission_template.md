@@ -133,17 +133,54 @@ If you were to test this function, what areas or scenarios would you focus on, a
 
 ## 1) Code Review Findings
 ### Critical bugs
-- 
-
+At first glance, the function looks like it computes the average of a list of values, skipping None. But the implementation has logical flaws.
+- It still divides by the total length of the list (len(values)), even though some entries may be None.
+- This means the denominator includes invalid entries, producing a wrong average.
+- Example: values = [1, None, 3] → total = 4.0, count = 3, result = 1.33 instead of the correct 2.0.
+So the output is misleading and incorrect.
+    
 ### Edge cases & risks
-- 
+- Incorrect denominator: Should only count valid (non-) values.
+- Empty list: Division by zero ().
+- All values are : Same division by zero problem.
+- Non-numeric values:  will raise  if  is not convertible (e.g., ).
+- Mixed types: Works for integers and floats, but fails for strings unless numeric.
 
 ### Code quality / design issues
-- 
+- Incorrect denominator logic
+  Divides by len(values) (total inputs), even when some are invalid (None).
+  Produces misleading averages when invalid entries exist.
+- Division by zero risk
+  Empty list ([]) or all None values cause ZeroDivisionError.
+- Type safety problems
+  Assumes all non-None values can be converted with float(v).
+  Raises ValueError or TypeError for non-numeric strings or incompatible types.
+- Silent handling of invalid data
+  No explicit checks or error messages for bad inputs.
+  Makes debugging harder and results unpredictable.
+- Lack of robustness
+  No fallback behavior when no valid measurements exist.
+  Should return None or raise a clear exception instead of crashing.
+- Design clarity
+  Function name suggests it averages valid measurements, but implementation doesn’t enforce validity properly.
+  Misleading intent vs. actual behavior. 
 
 ## 2) Proposed Fixes / Improvements
-### Summary of changes
-- 
+- 	Denominator fix
+  	Original: Divided by  (all inputs, including invalid ones).
+ 	Corrected: Divides only by the number of valid numeric entries.
+- 	Empty input handling
+ 	Original: Crashed with  if list was empty or all values were .
+ 	Corrected: Returns  (or raises a clear error) when no valid measurements exist.
+- 	Type safety
+ 	Original: Assumed all non- values could be converted to , causing errors on invalid strings.
+ 	Corrected: Added  to skip non-numeric values safely.
+- 	Robustness
+ 	Original: Fragile, misleading results when invalid data was present.
+ 	Corrected: Explicitly filters out invalid values and ensures only valid numbers are averaged.
+- 	Design clarity
+ 	Original: Function name suggested it averaged valid measurements, but implementation didn’t enforce validity.
+ 	Corrected: Behavior now matches the name — only valid numeric entries are considered.
 
 ### Corrected code
 See `correct_task3.py`
@@ -152,19 +189,21 @@ See `correct_task3.py`
 
 ### Testing Considerations
 If you were to test this function, what areas or scenarios would you focus on, and why?
-
+- I will be focussed on the business logis. because it shouldn't be incorrect or missleading. 
+- Also I will focus on exception handling methods used in that function to address exceptions. Because if exceptions has not handled very well it may leads to production issue or failures.
 
 ## 3) Explanation Review & Rewrite
 ### AI-generated explanation (original)
 > This function calculates the average of valid measurements by ignoring missing values (None) and averaging the remaining values. It safely handles mixed input types and ensures an accurate average
 
 ### Issues in original explanation
-- 
+- The explanation is correct by it self but when we see the implementation that is not fully addressed what the explanation said. it is not actually averaging the remaining values and alos not insures an accurate average.
 
 ### Rewritten explanation
-- 
+> This function calculates the average of valid measurements by ignoring missing values (None) and averaging the remaining values. It safely handles mixed input types and ensures an accurate average
+   - this can be remain the same since the implementation has corrected.
 
 ## 4) Final Judgment
-- Decision: Approve / Request Changes / Reject
-- Justification:
+- Decision: Approve / Request Changes / Reject : Request Changes
+- Justification: Since the code is working with a minor changes it can be modified and got approved.
 - Confidence & unknowns:
