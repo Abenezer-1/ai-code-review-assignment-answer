@@ -10,7 +10,16 @@ def count_valid_emails(emails):
     for email in emails:
         if isinstance(email, str) and email_pattern.match(email):
             count += 1
-    
     return count
 
+email_list = [
+    "test@example.com",
+    "hello@world.org",
+    "invalid-email",
+    "another@test.co",
+    12345,  # not a string, will be ignored
+]
+
+valid_count = count_valid_emails(email_list)
+print(f"Number of valid emails: {valid_count}")
 
